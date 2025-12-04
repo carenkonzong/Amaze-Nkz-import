@@ -3,23 +3,13 @@ import { User, SquareArrowDownRight, FileText } from "lucide-react";
 import { Scale, DollarSign } from "lucide-react";
 
 import { useState } from "react";
+import calculateTotalItem from "../services/index";
 
 function NewDeclarationPage() {
-  const [itemTotal, setItemTotal] = useState(0);
-  const [itemWeight, setItemWeight] = useState(" ");
+  const [itemWeight, setItemWeight] = useState("");
   const numberWeight = Number(itemWeight);
-
-  let total = 0;
-
-  if (numberWeight > 0 && numberWeight < 5) {
-    total = numberWeight * 1000;
-    console.log(total);
-    console.log(typeof total);
-
-    /* setItemTotal(total); */
-  }
-
-  console.log(itemWeight);
+  let total = calculateTotalItem(numberWeight);
+  let itemTotal = total;
 
   return (
     <form action="" className="flex flex-col gap-3">
@@ -149,27 +139,27 @@ function NewDeclarationPage() {
           </div>
           <div className="grid grid-cols-2 gap-5">
             <div>
-              <label htmlFor="" className="flex gap-2">
+              <label htmlFor="itemWeight" className="flex gap-2">
                 <Scale size={20} /> Poids (kg) *
               </label>
               <input
                 type="number"
                 min={0}
                 className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]"
-                id="weight"
+                id="itemWeight"
                 value={itemWeight}
                 onChange={(e) => setItemWeight(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="" className="flex gap-2">
+              <label className="flex gap-2">
                 <DollarSign size={20} /> Prix Calculé
               </label>
               <input
-                type="number"
+                type="text"
                 className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#e0e8f0] text-blue-800 font-bold"
                 disabled
-                value={itemTotal}
+                value={`${itemTotal} FCFA`}
               />
             </div>
           </div>
