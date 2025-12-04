@@ -2,14 +2,24 @@ import DeclarationElement from "../components/DeclarationElement";
 import { User, SquareArrowDownRight, FileText } from "lucide-react";
 import { Scale, DollarSign } from "lucide-react";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 function NewDeclarationPage() {
-  const [itemWeight, setItemWeight] = useState("");
-  const itemTotal = useMemo(() => {
-    const weight = Number(itemWeight);
-    return weight > 0 && weight < 5 ? weight * 1000 : 0;
-  }, [itemWeight]);
+  const [itemTotal, setItemTotal] = useState(0);
+  const [itemWeight, setItemWeight] = useState(" ");
+  const numberWeight = Number(itemWeight);
+
+  let total = 0;
+
+  if (numberWeight > 0 && numberWeight < 5) {
+    total = numberWeight * 1000;
+    console.log(total);
+    console.log(typeof total);
+
+    /* setItemTotal(total); */
+  }
+
+  console.log(itemWeight);
 
   return (
     <form action="" className="flex flex-col gap-3">
