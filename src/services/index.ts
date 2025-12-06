@@ -6,6 +6,7 @@ export function calculateTotalItem(weight: number) {
   if (weight <= 23) return { total: weight * 7000, prixUnitaire: 7000 };
   if (weight <= 70) return { total: weight * 6000, prixUnitaire: 6000 };
   if (weight <= 120) return { total: weight * 5800, prixUnitaire: 5800 };
+  if (weight > 120) return { total: weight * 5500, prixUnitaire: 5800 };
 
   return { total: weight * 0, prixUnitaire: 0 };
 }
