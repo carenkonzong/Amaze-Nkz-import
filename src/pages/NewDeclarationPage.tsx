@@ -3,17 +3,65 @@ import { User, SquareArrowDownRight, FileText } from "lucide-react";
 import { Scale, DollarSign } from "lucide-react";
 import { useState } from "react";
 import { calculateTotalItem } from "../services/index";
+import * as yup from "yup";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import type { Facture } from "../types/invoice";
 
 function NewDeclarationPage() {
   const [itemWeight, setItemWeight] = useState("");
   const numberWeight = Number(itemWeight);
-  /*   let total = calculateTotalItem(numberWeight);
-   */ const { prixUnitaire, total } = calculateTotalItem(numberWeight);
+  const { prixUnitaire, total } = calculateTotalItem(numberWeight);
 
   let itemTotal = total;
 
+  const REQUIRED_FIELD = "This Field is Required";
+  const schema = yup
+    .object({
+      numeroFacture: yup.string(),
+      totalFacture: yup.string().required(),
+      expediteur: yup.object({
+        nomExpediteur: yup.string().required(REQUIRED_FIELD),
+        telephoneExpediteur: yup.string().required(REQUIRED_FIELD),
+      }),
+      destinataire: yup.object({
+        nomDestinataire: yup.string().required(REQUIRED_FIELD),
+        telephoneDestinataire: yup.string().required(REQUIRED_FIELD),
+        villeDestinataire: yup.string().required(REQUIRED_FIELD),
+      }),
+      infoColis: yup.object({
+        descriptionColis: yup.string().required(REQUIRED_FIELD),
+        poidsColis: yup.string().required(REQUIRED_FIELD),
+        prixUnitaire: yup.string().required(REQUIRED_FIELD),
+        prixColis: yup.string().required(REQUIRED_FIELD),
+      }),
+      detailFacture: yup.object({
+        valeurColis: yup.string().required(REQUIRED_FIELD),
+        assurance: yup.string().required(REQUIRED_FIELD).default("false"),
+        montantAssurance: yup.string(),
+        modePaiement: yup.string().required(REQUIRED_FIELD),
+      }),
+    })
+    .required();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+  const onSubmit = (data: Facture) => {
+    console.log(data);
+  };
+
   return (
-    <form action="" className="flex flex-col gap-3">
+    <form
+      action=""
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col gap-3"
+    >
       <DeclarationElement
         head="Informations de l'Expéditeur"
         icon={User}
@@ -29,10 +77,10 @@ function NewDeclarationPage() {
               type="text"
               id="nomExpediteur"
               className="border rounded-lg w-full border-black/10 p-2 mt-2 bg-[#f8fafc]"
-              /* {...register("child.firstName")} */
+              {...register("expediteur.nomExpediteur")}
             />
             <span className="text-red-400 text-xs">
-              {/* {errors.child?.firstName?.message} */}
+              {errors.expediteur?.nomExpediteur?.message}
             </span>
           </div>
           <div>
@@ -47,10 +95,10 @@ function NewDeclarationPage() {
               id="telephoneExpediteur"
               placeholder="+237 6XX XX XX XX"
               className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]"
-              /* {...register("child.firstName")} */
+              {...register("expediteur.telephoneExpediteur")}
             />
             <span className="text-red-400 text-xs">
-              {/* {errors.child?.firstName?.message} */}
+              {errors.expediteur?.telephoneExpediteur?.message}
             </span>
           </div>
         </div>
@@ -74,10 +122,10 @@ function NewDeclarationPage() {
                 type="text"
                 id="nomDestinataire"
                 className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]"
-                /* {...register("child.firstName")} */
+                {...register("destinataire.nomDestinataire")}
               />
               <span className="text-red-400 text-xs">
-                {/* {errors.child?.firstName?.message} */}
+                {errors.destinataire?.nomDestinataire?.message}
               </span>
             </div>
             <div>
@@ -92,10 +140,10 @@ function NewDeclarationPage() {
                 id="telephoneDestinataire"
                 placeholder="+1 XXX XXX XXXX"
                 className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]"
-                /* {...register("child.firstName")} */
+                {...register("destinataire.telephoneDestinataire")}
               />
               <span className="text-red-400 text-xs">
-                {/* {errors.child?.firstName?.message} */}
+                {errors.destinataire?.telephoneDestinataire?.message}
               </span>
             </div>
           </div>
@@ -112,10 +160,10 @@ function NewDeclarationPage() {
                 id="villeDestinataire"
                 placeholder="Ex: Toronto, Montréal, Quebec City"
                 className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]"
-                /* {...register("child.firstName")} */
+                {...register("destinataire.villeDestinataire")}
               />
               <span className="text-red-400 text-xs">
-                {/* {errors.child?.firstName?.message} */}
+                {errors.destinataire?.villeDestinataire?.message}
               </span>
             </div>
           </div>
@@ -138,7 +186,11 @@ function NewDeclarationPage() {
               placeholder="Décrivez le contenu du colis..."
               rows={3}
               className="border rounded-xl border-black/10 p-2"
+              {...register("infoColis.descriptionColis")}
             ></textarea>
+            <span className="text-red-400 text-xs">
+              {errors.infoColis?.descriptionColis?.message}
+            </span>
           </div>
           <div className="grid grid-cols-3 gap-5">
             <div>
@@ -154,8 +206,12 @@ function NewDeclarationPage() {
                 className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]"
                 id="poidsColis"
                 value={itemWeight}
+                {...register("infoColis.poidsColis")}
                 onChange={(e) => setItemWeight(e.target.value)}
               />
+              <span className="text-red-400 text-xs">
+                {errors.infoColis?.poidsColis?.message}
+              </span>
             </div>
             <div>
               <label className="flex gap-2 text-sm font-semibold">
@@ -166,8 +222,12 @@ function NewDeclarationPage() {
                 id="prixUnitaire"
                 className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#e0e8f0] font-bold"
                 disabled
+                {...register("infoColis.prixUnitaire")}
                 value={`${prixUnitaire} FCFA`}
               />
+              <span className="text-red-400 text-xs">
+                {errors.infoColis?.prixUnitaire?.message}
+              </span>
             </div>
             <div>
               <label className="flex gap-2 text-sm font-semibold">
@@ -178,17 +238,28 @@ function NewDeclarationPage() {
                 id="prixColis"
                 className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#e0e8f0] text-blue-800 font-bold"
                 disabled
+                {...register("infoColis.prixColis")}
                 value={`${itemTotal} FCFA`}
               />
+              <span className="text-red-400 text-xs">
+                {errors.infoColis?.prixColis?.message}
+              </span>
             </div>
           </div>
         </div>
         <div className="border-t border-black/10 my-7"></div>
         <div className="flex justify-between p-5 bg-[#f4f6fb] rounded-xl items-center">
-          <div className="font-semibold text-xl">Montant Total: </div>
-          <div className="font-extrabold text-3xl text-blue-800">
-            {itemTotal} FCFA
-          </div>
+          <label className="font-semibold text-xl" htmlFor="totalFacture">
+            Montant Total:
+          </label>
+          <input
+            className="font-extrabold text-3xl text-blue-800 text-right"
+            type="text"
+            value={`${itemTotal} FCFA`}
+            {...register("totalFacture")}
+            id="totalFacture"
+            disabled
+          />
         </div>
       </DeclarationElement>
       <DeclarationElement
@@ -205,8 +276,12 @@ function NewDeclarationPage() {
             <input
               type="text"
               placeholder="Valeur estime du colis"
+              {...register("detailFacture.valeurColis")}
               className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]"
             />
+            <span className="text-red-400 text-xs">
+              {errors.detailFacture?.valeurColis?.message}
+            </span>
           </div>
           <div className="flex flex-col gap-1">
             <label htmlFor="" className="text-sm font-semibold">
@@ -214,20 +289,46 @@ function NewDeclarationPage() {
             </label>
             <div className="flex flex-row gap-5">
               <label htmlFor="" className="text-sm font-semibold gap-2 flex">
-                <input type="radio" name="assurance" value="true" />
+                <input
+                  type="radio"
+                  value="true"
+                  {...register("detailFacture.assurance")}
+                />
                 Oui
               </label>
               <label htmlFor="" className="text-sm font-semibold gap-2 flex">
-                <input type="radio" name="assurance" value="false" />
+                <input
+                  type="radio"
+                  value="false"
+                  {...register("detailFacture.assurance")}
+                />
                 Non
               </label>
             </div>
+            <span className="text-red-400 text-xs">
+              {errors.detailFacture?.assurance?.message}
+            </span>
+            {watch("detailFacture.assurance") === "true" && (
+              <div className="mt-3">
+                <label className="text-sm font-semibold">
+                  Montant Assurance Payé (FCFA)
+                </label>
+                <input
+                  type="number"
+                  className="border rounded-lg w-full border-black/10 p-2 mt-2 bg-[#f8fafc]"
+                  {...register("detailFacture.montantAssurance")}
+                />
+              </div>
+            )}
           </div>
           <div className="w-full">
             <label htmlFor="" className="text-sm font-semibold">
               Mode de Paiement
             </label>
-            <select className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]">
+            <select
+              className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]"
+              {...register("detailFacture.modePaiement")}
+            >
               <option value="select">
                 -- Selectionner une methode de Paiement --
               </option>
@@ -235,11 +336,17 @@ function NewDeclarationPage() {
               <option value="momo">MTN MoMo</option>
               <option value="virement">Virement</option>
             </select>
+            <span className="text-red-400 text-xs">
+              {errors.detailFacture?.assurance?.message}
+            </span>
           </div>
         </div>
       </DeclarationElement>
       <div className="flex justify-center mb-5 ">
-        <button className="max-w-5xl w-full bg-blue-900 py-3 px-5 text-white rounded-xl cursor-pointer  ">
+        <button
+          type="submit"
+          className="max-w-5xl w-full mx-5 bg-blue-900 py-3 px-5 text-white rounded-xl cursor-pointer hover:bg-green-900 "
+        >
           Générer la Facture
         </button>
       </div>

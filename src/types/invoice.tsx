@@ -1,9 +1,10 @@
 export type Facture = {
-  numeroFacture: string;
+  numeroFacture?: string;
   expediteur: informationExpediteur;
   destinataire: informationDestinataire;
-  descriptionColis: descriptionColis;
+  infoColis: infoColis;
   detailFacture: detailFacture;
+  totalFacture: string;
 };
 
 export type informationExpediteur = {
@@ -17,13 +18,16 @@ export type informationDestinataire = {
   villeDestinataire: string;
 };
 
-export type descriptionColis = {
+export type infoColis = {
+  descriptionColis: string;
   poidsColis: string;
+  prixUnitaire: string;
   prixColis: string;
 };
 
 export type detailFacture = {
   valeurColis: string;
-  assurance: boolean;
+  assurance: string;
+  montantAssurance?: string;
   modePaiement: string;
 };
