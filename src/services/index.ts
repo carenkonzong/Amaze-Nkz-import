@@ -1,4 +1,4 @@
-export function calculateTotalItem(weight: number) {
+function calculateTotalItem(weight: number) {
   if (weight <= 0) return { total: 0, prixUnitaire: 0 };
   if (weight <= 2.5) return { total: weight * 10000, prixUnitaire: 10000 };
   if (weight <= 5) return { total: weight * 8500, prixUnitaire: 8500 };
@@ -10,3 +10,31 @@ export function calculateTotalItem(weight: number) {
 
   return { total: weight * 0, prixUnitaire: 0 };
 }
+
+const pad2 = (num: number) => num.toString().padStart(2, "0");
+
+function generateInvoiceNumber(shipmentDate: Date, sequence: number): string {
+  const dateFacture = new Date();
+
+  const jourFacture = pad2(dateFacture.getDate());
+  const moisFacture = pad2(dateFacture.getMonth() + 1);
+
+  const jourExpedition = pad2(shipmentDate.getDate());
+  const moisExpedition = pad2(shipmentDate.getMonth() + 1);
+
+  const seq = sequence.toString().padStart(3, "0");
+
+  return `RECU-${jourFacture}${moisFacture}/${jourExpedition}${moisExpedition}-${seq}`;
+}
+
+function formatDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  const formattedDate = `${year}-${month}-${day}`;
+
+  return formattedDate;
+}
+
+export { calculateTotalItem, generateInvoiceNumber, formatDate };

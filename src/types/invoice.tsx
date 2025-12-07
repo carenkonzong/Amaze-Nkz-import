@@ -1,10 +1,12 @@
 export type Facture = {
-  numeroFacture?: string;
+  numeroFacture: string;
   expediteur: informationExpediteur;
   destinataire: informationDestinataire;
   infoColis: infoColis;
   detailFacture: detailFacture;
   totalFacture: string;
+  dateFacture: string;
+  dateExpedition: string;
 };
 
 export type informationExpediteur = {
