@@ -1,0 +1,146 @@
+{
+  "factures": [
+    {
+      "id": 1,
+      "numeroFacture": "RECU-2810/0511-001",
+      "expediteur": {
+        "nomExpediteur": "Ngassa Mireille",
+        "telephoneExpediteur": "+237 677 45 12 89"
+      },
+      "destinataire": {
+        "nomDestinataire": "Jean-Paul Nkweti",
+        "telephoneDestinataire": "+1 647 832 9012",
+        "villeDestinataire": "Toronto"
+      },
+      "infoColis": {
+        "descriptionColis": "Vêtements neufs, chaussures",
+        "poidsColis": "12",
+        "prixUnitaire": "6000",
+        "prixColis": "72000"
+      },
+      "detailFacture": {
+        "valeurColis": "100000",
+        "assurance": "true",
+        "montantAssurance": "2000",
+        "modePaiement": "orangeMoney"
+      },
+      "totalFacture": "103750",
+      "dateFacture": "2025-10-28",
+      "dateExpedition": "2025-11-05"
+    },
+
+    {
+      "id": 2,
+      "numeroFacture": "RECU-2910/0511-002",
+      "expediteur": {
+        "nomExpediteur": "Tchoufa Lionel",
+        "telephoneExpediteur": "+237 690 55 22 18"
+      },
+      "destinataire": {
+        "nomDestinataire": "Aline Mukendi",
+        "telephoneDestinataire": "+1 438 901 5567",
+        "villeDestinataire": "Montréal"
+      },
+      "infoColis": {
+        "descriptionColis": "Perruques, mèches",
+        "poidsColis": "4",
+        "prixUnitaire": "8500",
+        "prixColis": "34000"
+      },
+      "detailFacture": {
+        "valeurColis": "65000",
+        "assurance": "false",
+        "modePaiement": "momo"
+      },
+      "totalFacture": "34000",
+      "dateFacture": "2025-10-29",
+      "dateExpedition": "2025-11-05"
+    },
+
+    {
+      "id": 3,
+      "numeroFacture": "RECU-3010/1211-001",
+      "expediteur": {
+        "nomExpediteur": "Ateba Rosine",
+        "telephoneExpediteur": "+237 651 11 82 34"
+      },
+      "destinataire": {
+        "nomDestinataire": "Samuel Doe",
+        "telephoneDestinataire": "+1 204 889 7721",
+        "villeDestinataire": "Winnipeg"
+      },
+      "infoColis": {
+        "descriptionColis": "Vivres africains: pistache, épices, ndolé",
+        "poidsColis": "18",
+        "prixUnitaire": "7000",
+        "prixColis": "126000"
+      },
+      "detailFacture": {
+        "valeurColis": "85000",
+        "assurance": "true",
+        "montantAssurance": "1700",
+        "modePaiement": "virement"
+      },
+      "totalFacture": "127700",
+      "dateFacture": "2025-10-30",
+      "dateExpedition": "2025-11-12"
+    },
+
+    {
+      "id": 4,
+      "numeroFacture": "RECU-0111/2011-001",
+      "expediteur": {
+        "nomExpediteur": "Mboa Tradex",
+        "telephoneExpediteur": "+237 680 22 10 54"
+      },
+      "destinataire": {
+        "nomDestinataire": "Benoît Tagne",
+        "telephoneDestinataire": "+1 613 900 8911",
+        "villeDestinataire": "Ottawa"
+      },
+      "infoColis": {
+        "descriptionColis": "Tapis, décorations",
+        "poidsColis": "25",
+        "prixUnitaire": "6000",
+        "prixColis": "150000"
+      },
+      "detailFacture": {
+        "valeurColis": "120000",
+        "assurance": "false",
+        "modePaiement": "orangeMoney"
+      },
+      "totalFacture": "150000",
+      "dateFacture": "2025-11-01",
+      "dateExpedition": "2025-11-20"
+    },
+
+    {
+      "id": 5,
+      "numeroFacture": "RECU-0211/2011-002",
+      "expediteur": {
+        "nomExpediteur": "Laura Kenfack",
+        "telephoneExpediteur": "+237 690 78 34 22"
+      },
+      "destinataire": {
+        "nomDestinataire": "Dora Ngaleu",
+        "telephoneDestinataire": "+1 514 455 7722",
+        "villeDestinataire": "Laval"
+      },
+      "infoColis": {
+        "descriptionColis": "Chaussures, sacs à main, petits accessoires",
+        "poidsColis": "7",
+        "prixUnitaire": "7500",
+        "prixColis": "52500"
+      },
+      "detailFacture": {
+        "valeurColis": "90000",
+        "assurance": "true",
+        "montantAssurance": "1800",
+        "modePaiement": "momo"
+      },
+      "totalFacture": "54300",
+      "dateFacture": "2025-11-02",
+      "dateExpedition": "2025-11-20"
+    }
+  ]
+}
