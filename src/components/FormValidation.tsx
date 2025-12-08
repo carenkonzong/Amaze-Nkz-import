@@ -1,37 +1,19 @@
 import { User, MapPin, Package, ReceiptText } from "lucide-react";
+import type { Facture } from "../types/invoice";
 
-function FormValidation() {
-  const DATA = {
-    expediteur: {
-      nomExpediteur: "Jean-Paul Nkoue",
-      telephoneExpediteur: "+237 679 45 32 11",
-    },
+type Props = {
+  data: Facture;
+};
 
-    destinataire: {
-      nomDestinataire: "Marie Dupont",
-      telephoneDestinataire: "+1 (416) 789-2234",
-      villeDestinataire: "Toronto, ON",
-    },
-
-    infoColis: {
-      descriptionColis:
-        "Vêtements, chaussures, 2 téléphones, accessoires personnels ",
-      poidsColis: "18",
-      prixUnitaire: "6 000 FCFA",
-      prixColis: "108 000 FCFA",
-    },
-
-    detailFacture: {
-      modePaiement: "OrangeMoney",
-      assurance: "true",
-      montantAssurance: "2500",
-      valeurColis: "150 000 FCFA",
-    },
-    totalFacture: "250 000 FCFA",
-  };
-
-  const { expediteur, destinataire, infoColis, detailFacture, totalFacture } =
-    DATA;
+function FormValidation({ data }: Props) {
+  const {
+    expediteur,
+    destinataire,
+    infoColis,
+    detailFacture,
+    totalFacture,
+    numeroFacture,
+  } = data;
 
   return (
     <div className="flex justify-center mt-5 px-5">
@@ -42,7 +24,7 @@ function FormValidation() {
         </h2>
         <div className="mt-4 w-full bg-blue-300/20 items-center flex flex-col py-3 rounded-2xl">
           <h2 className="text-sm text-gray-500">Numéro de Reçu</h2>
-          <p className="font-bold text-xl text-blue-900">410</p>
+          <p className="font-bold text-xl text-blue-900">{numeroFacture}</p>
         </div>
         <div className="flex items-center gap-2 mt-5 text-gray-500">
           <User size={18} />
@@ -141,7 +123,10 @@ function FormValidation() {
           </div>
         </div>
         <div className="justify-end flex gap-5 mt-5">
-          <button className="p-2 rounded-xl border border-black/10 cursor-pointer hover:bg-green-600">
+          <button
+            onClick={}
+            className="p-2 rounded-xl border border-black/10 cursor-pointer hover:bg-green-600"
+          >
             Modifier
           </button>
           <button className="p-2 rounded-xl text-white bg-blue-900 hover:bg-blue-800 cursor-pointer">
