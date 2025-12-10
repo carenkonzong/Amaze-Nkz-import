@@ -14,19 +14,53 @@ import type { Facture } from "../types/invoice";
 import getNextInvoiceNumber from "../services/invoiceService";
 import FormValidation from "../components/FormValidation";
 
+// 👇 extra type for the form values (includes dates)
+type FactureFormValues = {
+  numeroFacture: string;
+  dateExpedition: string;
+  dateFacture: string;
+  /* totalFacture: string; */ // we don't really use this from form, but it's in schema
+
+  expediteur: {
+    nomExpediteur: string;
+    telephoneExpediteur: string;
+  };
+
+  destinataire: {
+    nomDestinataire: string;
+    telephoneDestinataire: string;
+    villeDestinataire: string;
+  };
+
+  infoColis: {
+    descriptionColis: string;
+    poidsColis: string;
+  };
+
+  detailFacture: {
+    valeurColis: string;
+    assurance: string; // "true" | "false"
+    montantAssurance?: string;
+    modePaiement: string;
+  };
+};
+
 function NewDeclarationPage() {
+  // ---- Dates & invoice number ----
   const dateExpedition = new Date("2025-11-21");
   const [numeroFacture, setNumeroFacture] = useState("");
   const today = new Date();
   const dateFacture = formatDate(today);
   const dateExpeditionFormatted = formatDate(dateExpedition);
+
+  // ---- Review vs Form state ----
   const [previewFacture, setPreviewFacture] = useState<Facture | null>(null);
   const [form, setForm] = useState(true);
 
+  // ---- Generate invoice number based on shipment date ----
   useEffect(() => {
     const fetchNextInvoiceNumber = async () => {
       const nextNumber = await getNextInvoiceNumber(dateExpeditionFormatted); // e.g. 1, 2, 3...
-
       const generated = generateInvoiceNumber(dateExpedition, nextNumber);
       setNumeroFacture(generated);
     };
@@ -34,13 +68,15 @@ function NewDeclarationPage() {
     fetchNextInvoiceNumber();
   }, [dateExpedition, dateExpeditionFormatted]);
 
+  // ---- Live weight state for UI (prixUnitaire, prixColis, total) ----
   const [poidsItem, setpoidsItem] = useState("");
-  const numberWeight = Number(poidsItem);
+  const numberWeight = Number(poidsItem || 0);
   const { prixUnitaire, total } = calculateTotalItem(numberWeight);
+  const itemTotal = total;
 
-  let itemTotal = total;
-
+  // ---- Yup schema ----
   const REQUIRED_FIELD = "This Field is Required";
+
   const schema = yup
     .object({
       numeroFacture: yup.string().required().default(numeroFacture),
@@ -49,7 +85,7 @@ function NewDeclarationPage() {
         .required()
         .default(String(formatDate(dateExpedition))),
       dateFacture: yup.string().required().default(String(dateFacture)),
-      totalFacture: yup.string().required(),
+      /* totalFacture: yup.string().required(REQUIRED_FIELD), */
       expediteur: yup.object({
         nomExpediteur: yup.string().required(REQUIRED_FIELD),
         telephoneExpediteur: yup.string().required(REQUIRED_FIELD),
@@ -62,8 +98,8 @@ function NewDeclarationPage() {
       infoColis: yup.object({
         descriptionColis: yup.string().required(REQUIRED_FIELD),
         poidsColis: yup.string().required(REQUIRED_FIELD),
-        prixUnitaire: yup.string().required(REQUIRED_FIELD),
-        prixColis: yup.string().required(REQUIRED_FIELD),
+        /* prixUnitaire: yup.string().required(REQUIRED_FIELD),
+        prixColis: yup.string().required(REQUIRED_FIELD), */
       }),
       detailFacture: yup.object({
         valeurColis: yup.string().required(REQUIRED_FIELD),
@@ -74,20 +110,61 @@ function NewDeclarationPage() {
     })
     .required();
 
+  // ---- React Hook Form ----
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm({
+  } = useForm<FactureFormValues>({
     resolver: yupResolver(schema),
   });
-  const onSubmit = async (data: Facture) => {
-    setPreviewFacture(data);
+
+  errors ? console.log(errors) : null;
+
+  // ---- FIRST STAGE: build full Facture object here ----
+  const onSubmit = async (data: FactureFormValues) => {
+    // 1️⃣ Recalculate pricing based on the weight from the form (source of truth)
+    const poids = Number(data.infoColis.poidsColis || "0");
+    const { prixUnitaire: pu, total: totalColis } = calculateTotalItem(poids);
+
+    // 2️⃣ Build the complete Facture object
+    const factureComplete: Facture = {
+      numeroFacture: numeroFacture,
+      dateFacture: dateFacture, // 👈 add this
+      dateExpedition: dateExpeditionFormatted,
+      expediteur: {
+        nomExpediteur: data.expediteur.nomExpediteur,
+        telephoneExpediteur: data.expediteur.telephoneExpediteur,
+      },
+      destinataire: {
+        nomDestinataire: data.destinataire.nomDestinataire,
+        telephoneDestinataire: data.destinataire.telephoneDestinataire,
+        villeDestinataire: data.destinataire.villeDestinataire,
+      },
+      infoColis: {
+        descriptionColis: data.infoColis.descriptionColis,
+        poidsColis: data.infoColis.poidsColis,
+        prixUnitaire: `${pu} FCFA`,
+        prixColis: `${totalColis} FCFA`,
+      },
+      detailFacture: {
+        valeurColis: data.detailFacture.valeurColis,
+        assurance: data.detailFacture.assurance,
+        montantAssurance: data.detailFacture.montantAssurance,
+        modePaiement: data.detailFacture.modePaiement,
+      },
+      totalFacture: `${totalColis} FCFA`,
+    };
+
+    // 3️⃣ Save it for the preview step & hide the form
+    setPreviewFacture(factureComplete);
     setForm(false);
-    console.log(data);
+
+    console.log("FACTURE COMPLETE:", factureComplete);
   };
 
+  // ---- JSX ----
   return (
     <>
       {form ? (
@@ -131,6 +208,8 @@ function NewDeclarationPage() {
               </div>
             </div>
           </DeclarationElement>
+
+          {/* ---- Expéditeur ---- */}
           <DeclarationElement
             head="Informations de l'Expéditeur"
             icon={User}
@@ -175,6 +254,8 @@ function NewDeclarationPage() {
               </div>
             </div>
           </DeclarationElement>
+
+          {/* ---- Destinataire ---- */}
           <DeclarationElement
             head="Informations du Destinataire"
             icon={SquareArrowDownRight}
@@ -219,28 +300,28 @@ function NewDeclarationPage() {
                   </span>
                 </div>
               </div>
-              <div className="">
-                <div>
-                  <label
-                    htmlFor="villeDestinataire"
-                    className="text-sm font-semibold"
-                  >
-                    Ville de Résidence (Canada) *
-                  </label>
-                  <input
-                    type="text"
-                    id="villeDestinataire"
-                    placeholder="Ex: Toronto, Montréal, Quebec City"
-                    className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]"
-                    {...register("destinataire.villeDestinataire")}
-                  />
-                  <span className="text-red-400 text-xs">
-                    {errors.destinataire?.villeDestinataire?.message}
-                  </span>
-                </div>
+              <div>
+                <label
+                  htmlFor="villeDestinataire"
+                  className="text-sm font-semibold"
+                >
+                  Ville de Résidence (Canada) *
+                </label>
+                <input
+                  type="text"
+                  id="villeDestinataire"
+                  placeholder="Ex: Toronto, Montréal, Quebec City"
+                  className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]"
+                  {...register("destinataire.villeDestinataire")}
+                />
+                <span className="text-red-400 text-xs">
+                  {errors.destinataire?.villeDestinataire?.message}
+                </span>
               </div>
             </div>
           </DeclarationElement>
+
+          {/* ---- Colis ---- */}
           <DeclarationElement
             head="Informations Colis"
             icon={FileText}
@@ -297,12 +378,8 @@ function NewDeclarationPage() {
                     id="prixUnitaire"
                     className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#e0e8f0] font-bold"
                     disabled
-                    {...register("infoColis.prixUnitaire")}
                     value={`${prixUnitaire} FCFA`}
                   />
-                  <span className="text-red-400 text-xs">
-                    {errors.infoColis?.prixUnitaire?.message}
-                  </span>
                 </div>
                 <div>
                   <label className="flex gap-2 text-sm font-semibold">
@@ -313,12 +390,8 @@ function NewDeclarationPage() {
                     id="prixColis"
                     className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#e0e8f0] text-blue-800 font-bold"
                     disabled
-                    {...register("infoColis.prixColis")}
                     value={`${itemTotal} FCFA`}
                   />
-                  <span className="text-red-400 text-xs">
-                    {errors.infoColis?.prixColis?.message}
-                  </span>
                 </div>
               </div>
             </div>
@@ -331,12 +404,13 @@ function NewDeclarationPage() {
                 className="font-extrabold text-3xl text-blue-800 text-right"
                 type="text"
                 value={`${itemTotal} FCFA`}
-                {...register("totalFacture")}
                 id="totalFacture"
                 disabled
               />
             </div>
           </DeclarationElement>
+
+          {/* ---- Détails Facture ---- */}
           <DeclarationElement
             head="Détails de Facturation"
             icon={FileText}
@@ -350,7 +424,7 @@ function NewDeclarationPage() {
                 </label>
                 <input
                   type="text"
-                  placeholder="Valeur estime du colis"
+                  placeholder="Valeur estimée du colis"
                   {...register("detailFacture.valeurColis")}
                   className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]"
                 />
@@ -418,11 +492,12 @@ function NewDeclarationPage() {
                   <option value="virement">Virement</option>
                 </select>
                 <span className="text-red-400 text-xs">
-                  {errors.detailFacture?.assurance?.message}
+                  {errors.detailFacture?.modePaiement?.message}
                 </span>
               </div>
             </div>
           </DeclarationElement>
+
           <div className="flex justify-center mb-5 ">
             <button
               type="submit"
