@@ -124,7 +124,7 @@ function FormValidation({ data }: Props) {
         </div>
         <div className="justify-end flex gap-5 mt-5">
           <button
-            /* onClick={} */
+            onClick={}
             className="p-2 rounded-xl border border-black/10 cursor-pointer hover:bg-green-600"
           >
             Modifier
