@@ -3,9 +3,10 @@ import type { Facture } from "../types/invoice";
 
 type Props = {
   data: Facture;
+  onClose: () => void;
 };
 
-function FormValidation({ data }: Props) {
+function FormValidation({ data, onClose }: Props) {
   const {
     expediteur,
     destinataire,
@@ -16,8 +17,8 @@ function FormValidation({ data }: Props) {
   } = data;
 
   return (
-    <div className="flex justify-center mt-5 px-5">
-      <div className="max-w-3xl  border w-full rounded-2xl border-black/10 p-5">
+    <div className="flex justify-center transition-all duration-200 scale-100 opacity-100 ">
+      <div className="max-w-2xl w-full rounded-2xl p-5 bg-white">
         <h1 className="font-semibold text-xl">Confirmer l'Expédition</h1>
         <h2 className="text-sm text-gray-500">
           Veuillez vérifier toutes les informations avant de confirmer.
@@ -82,7 +83,7 @@ function FormValidation({ data }: Props) {
           <div className="flex justify-between gap-3">
             <h1 className="text-sm">{infoColis.descriptionColis}</h1>
             <p className="font-semibold text-xl text-right text-blue-900">
-              {infoColis.prixColis}
+              {`${infoColis.prixColis} FCFA`}
             </p>
           </div>
         </div>
@@ -98,13 +99,15 @@ function FormValidation({ data }: Props) {
           </div>
           <div className="flex justify-between">
             <p className="text-gray-600 text-sm">Valeur déclarée</p>
-            <p className="text-sm text-right">{detailFacture.valeurColis}</p>
+            <p className="text-sm text-right">
+              {`${detailFacture.valeurColis} FCFA`}
+            </p>
           </div>
           <div className="flex justify-between">
             <p className="text-gray-600 text-sm">Assurance</p>
             <p className="text-sm text-right">
-              {detailFacture.assurance
-                ? `Oui (${detailFacture.montantAssurance} FCFA)`
+              {detailFacture.assurance === "true"
+                ? `Oui (${detailFacture?.montantAssurance} FCFA)`
                 : "Non"}
             </p>
           </div>
@@ -115,16 +118,16 @@ function FormValidation({ data }: Props) {
           <div className="border-b border-black/10 my-2"></div>
           <div className="flex justify-between">
             <p className="text-gray-600 text-sm">Frais d'expédition</p>
-            <p className="text-sm text-right">{totalFacture}</p>
+            <p className="text-sm text-right">{`${totalFacture} FCFA`}</p>
           </div>
           <div className="flex justify-between mt-5 font-bold text-lg">
             <p className="text-blue-900 ">TOTAL À PAYER</p>
-            <p className=" text-right text-blue-900">{totalFacture}</p>
+            <p className=" text-right text-blue-900">{`${totalFacture} FCFA`}</p>
           </div>
         </div>
         <div className="justify-end flex gap-5 mt-5">
           <button
-            onClick={}
+            onClick={onClose}
             className="p-2 rounded-xl border border-black/10 cursor-pointer hover:bg-green-600"
           >
             Modifier

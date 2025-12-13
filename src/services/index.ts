@@ -37,4 +37,6 @@ function formatDate(date: Date) {
   return formattedDate;
 }
 
+function edit() {}
+
 export { calculateTotalItem, generateInvoiceNumber, formatDate };
