@@ -23,6 +23,7 @@ function DeclarationElement({
             <Icon className={`${iconColor}`} />
             <h1 className="text-2xl font-semibold ">{head}</h1>
           </div>
+          <button> + Ajouter un Colis</button>
         </div>
         <div className="border-t border-black/10" />
 
