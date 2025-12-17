@@ -123,55 +123,53 @@ function FormulaireDenregistrement() {
 
   return (
     <>
+      <div className="bg-linear-to-r from-blue-500 to-green-500 flex justify-center px-5">
+        <div className="flex max-w-7xl justify-between w-full m-5 text-white">
+          <div className="flex items-center gap-3">
+            <div>
+              <PlaneTakeoff size={40} />
+            </div>
+            <div className="">
+              <div className="text-3xl font-bold font-sans">Amaze NKZ</div>
+              <div className="text-sm">Cameroun → Canada</div>
+            </div>
+          </div>
+          <div></div>
+        </div>
+      </div>
+      <div className="flex justify-center mt-10 px-5">
+        <div className="grid grid-cols-3 gap-5">
+          <div>
+            <div className="text-sm font-semibold pl-2">Numéro de Facture</div>
+            <div className="bg-gray-400/10 p-2 rounded-2xl text-blue-900 mt-2">
+              {numeroFacture || "Génération en cours..."}
+            </div>
+          </div>
+          <div>
+            <div className="text-sm font-semibold pl-2 flex items-center gap-3">
+              <CalendarDays size={18} />
+              Date de Facture
+            </div>
+            <div className="bg-gray-400/10 p-2 rounded-2xl text-gray-700 mt-2">
+              {dateFacture}
+            </div>
+          </div>
+          <div>
+            <div className="text-sm font-semibold pl-2 flex items-center gap-3">
+              <CalendarDays size={18} />
+              Date d'Expédition Prévue
+            </div>
+            <div className="bg-gray-400/10 p-2 rounded-2xl text-gray-700 mt-2">
+              {dateExpeditionFormatted}
+            </div>
+          </div>
+        </div>
+      </div>
       <form
         action=""
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-3"
       >
-        <div className="bg-linear-to-r from-blue-500 to-green-500 flex justify-center px-5">
-          <div className="flex max-w-7xl justify-between w-full m-5 text-white">
-            <div className="flex items-center gap-3">
-              <div>
-                <PlaneTakeoff size={40} />
-              </div>
-              <div className="">
-                <div className="text-3xl font-bold font-sans">Amaze NKZ</div>
-                <div className="text-sm">Cameroun → Canada</div>
-              </div>
-            </div>
-            <div></div>
-          </div>
-        </div>
-        <div className="flex justify-center mt-5 px-5">
-          <div className="grid grid-cols-3 gap-5">
-            <div>
-              <div className="text-sm font-semibold pl-2">
-                Numéro de Facture
-              </div>
-              <div className="bg-gray-400/10 p-2 rounded-2xl text-blue-900 mt-2">
-                {numeroFacture || "Génération en cours..."}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm font-semibold pl-2 flex items-center gap-3">
-                <CalendarDays size={18} />
-                Date de Facture
-              </div>
-              <div className="bg-gray-400/10 p-2 rounded-2xl text-gray-700 mt-2">
-                {dateFacture}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm font-semibold pl-2 flex items-center gap-3">
-                <CalendarDays size={18} />
-                Date d'Expédition Prévue
-              </div>
-              <div className="bg-gray-400/10 p-2 rounded-2xl text-gray-700 mt-2">
-                {dateExpeditionFormatted}
-              </div>
-            </div>
-          </div>
-        </div>
         <DeclarationElement
           head="Informations de l'Expéditeur"
           icon={User}
@@ -284,6 +282,7 @@ function FormulaireDenregistrement() {
           icon={FileText}
           iconColor="text-green-800"
           color="bg-[#eff8f1]"
+          btn={true}
         >
           <div className="border rounded-xl p-3 border-black/10">
             <h1 className="mb-3 font-bold text-blue-800">Colis #1</h1>
@@ -470,7 +469,7 @@ function FormulaireDenregistrement() {
         <div className="flex justify-center mb-5 ">
           <button
             type="submit"
-            className="max-w-5xl w-full mx-5 bg-blue-900 py-3 px-5 text-white rounded-xl cursor-pointer hover:bg-green-900 "
+            className="max-w-5xl w-full mx-5 bg-blue-900 py-3 px-5 text-white rounded-xl cursor-pointer hover:bg-green-900 transition duration-300 hover:-translate-y-1 hover:scale-110"
           >
             Générer la Facture
           </button>
