@@ -16,6 +16,13 @@ function FormValidation({ data, onClose }: Props) {
     numeroFacture,
   } = data;
 
+  const totalWeight = infoColis.reduce(
+    (sum, colis) => sum + colis.poidsColis,
+    0
+  );
+
+  const montantAssurance = detailFacture.montantAssurance ?? 0;
+
   return (
     <div className="flex justify-center transition-all duration-200 scale-100 opacity-100 ">
       <div className="max-w-2xl w-full rounded-2xl p-5 bg-white">
@@ -73,19 +80,27 @@ function FormValidation({ data, onClose }: Props) {
         <div className="border-b border-black/10 mt-5"></div>
         <div className="flex items-center gap-2 mt-5 text-gray-500">
           <Package size={18} />
-          <h1 className=" font-semibold">COLIS(1)</h1>
+          <h1 className=" font-semibold">ARTICLE ({infoColis.length})</h1>
         </div>
-        <div className="bg-gray-300/10 p-5 rounded-2xl">
-          <div className="flex justify-between">
-            <h1 className="text-blue-900 text-sm">Colis #1</h1>
-            <p className="text-gray-600 text-sm text-right">{`${infoColis.poidsColis} Kg`}</p>
-          </div>
-          <div className="flex justify-between gap-3">
-            <h1 className="text-sm">{infoColis.descriptionColis}</h1>
-            <p className="font-semibold text-xl text-right text-blue-900">
-              {`${infoColis.prixColis} FCFA`}
-            </p>
-          </div>
+        <div className="space-y-3">
+          {infoColis.map((colis, index) => (
+            <div key={index} className="bg-gray-300/10 p-5 rounded-2xl">
+              <div className="flex justify-between">
+                <h1 className="text-blue-900 text-sm font-semibold">
+                  Article #{index + 1}
+                </h1>
+                <p className="text-gray-600 text-sm text-right">
+                  {colis.poidsColis} Kg
+                </p>
+              </div>
+              <div className="flex justify-between gap-3 mt-2">
+                <h1 className="text-sm">{colis.descriptionColis}</h1>
+                <p className="font-semibold text-xl text-right text-blue-900">
+                  {colis.prixColis} FCFA
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
         <div className="border-b border-black/10 mt-5"></div>
         <div className="flex items-center gap-2 mt-5 text-gray-500">
@@ -94,8 +109,12 @@ function FormValidation({ data, onClose }: Props) {
         </div>
         <div className="bg-gray-300/10 p-5 rounded-2xl">
           <div className="flex justify-between">
+            <p className="text-gray-600 text-sm">Nombre d'articles</p>
+            <p className="text-sm text-right">{infoColis.length}</p>
+          </div>
+          <div className="flex justify-between">
             <p className="text-gray-600 text-sm">Poids total</p>
-            <p className="text-sm text-right">{`${infoColis.poidsColis} Kg`}</p>
+            <p className="text-sm text-right">{`${totalWeight} Kg`}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-gray-600 text-sm">Valeur déclarée</p>
@@ -122,7 +141,12 @@ function FormValidation({ data, onClose }: Props) {
           </div>
           <div className="flex justify-between mt-5 font-bold text-lg">
             <p className="text-blue-900 ">TOTAL À PAYER</p>
-            <p className=" text-right text-blue-900">{`${totalFacture} FCFA`}</p>
+            {/* <p className=" text-right text-blue-900">{`${totalFacture + detailFacture?.montantAssurance} FCFA`}</p> */}
+            <p className=" text-right text-blue-900">
+              {detailFacture.assurance === "true"
+                ? `${totalFacture + montantAssurance} FCFA`
+                : `${totalFacture} FCFA`}
+            </p>
           </div>
         </div>
         <div className="justify-end flex gap-5 mt-5">
