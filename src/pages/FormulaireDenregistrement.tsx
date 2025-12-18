@@ -1,9 +1,10 @@
-import DeclarationElement from "../components/DeclarationElement";
+import ElementInformation from "../components/ElementInformation";
 import {
   User,
   SquareArrowDownRight,
   FileText,
   PlaneTakeoff,
+  Trash2,
 } from "lucide-react";
 import { Scale, DollarSign, CalendarDays } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -13,7 +14,7 @@ import {
   generateInvoiceNumber,
 } from "../services/index";
 import * as yup from "yup";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import type { Facture, infoFormulaire } from "../types/invoice";
 import getNextInvoiceNumber from "../services/invoiceService";
@@ -38,11 +39,11 @@ function FormulaireDenregistrement() {
     fetchNextInvoiceNumber();
   }, [dateExpedition, dateExpeditionFormatted]);
 
-  const [poidsItem, setpoidsItem] = useState("");
+  /* const [poidsItem, setpoidsItem] = useState(""); */
 
-  const { prixUnitaire, total } = calculateTotalItem(Number(poidsItem));
+  /* const { prixUnitaire, total } = calculateTotalItem(Number(poidsItem)); */
 
-  let itemTotal = total;
+  /* let itemTotal = total; */
 
   const REQUIRED_FIELD = "Ce champ est obligatoire";
   const schema = yup
@@ -56,13 +57,20 @@ function FormulaireDenregistrement() {
         telephoneDestinataire: yup.string().required(REQUIRED_FIELD),
         villeDestinataire: yup.string().required(REQUIRED_FIELD),
       }),
-      infoColis: yup.object({
-        descriptionColis: yup.string().required(REQUIRED_FIELD),
-        poidsColis: yup
-          .number()
-          .transform((value) => (Number.isNaN(value) ? undefined : value))
-          .required(REQUIRED_FIELD),
-      }),
+      infoColis: yup
+        .array()
+        .of(
+          yup.object({
+            descriptionColis: yup.string().required(REQUIRED_FIELD),
+            poidsColis: yup
+              .number()
+              .transform((value) => (Number.isNaN(value) ? undefined : value))
+              .required(REQUIRED_FIELD)
+              .min(0.1),
+          })
+        )
+        .min(1)
+        .required(),
       detailFacture: yup.object({
         valeurColis: yup.number().required(REQUIRED_FIELD),
         assurance: yup.string().required(REQUIRED_FIELD).default("false"),
@@ -83,41 +91,70 @@ function FormulaireDenregistrement() {
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = useForm<infoFormulaire>({
     resolver: yupResolver(schema),
     defaultValues: {
+      infoColis: [{ descriptionColis: " ", poidsColis: 0 }],
       detailFacture: {
         assurance: "false",
       },
     },
   });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "infoColis",
+  });
+
+  const watchedPackages = watch("infoColis");
+
+  const calculateGrandTotal = () => {
+    let grandTotal = 0;
+    watchedPackages.forEach((pkg) => {
+      if (pkg.poidsColis > 0) {
+        const { total } = calculateTotalItem(pkg.poidsColis);
+        grandTotal += total;
+      }
+    });
+    return grandTotal;
+  };
+
   const onSubmit = async (data: infoFormulaire) => {
-    const { prixUnitaire: pu, total: totalColis } = calculateTotalItem(
-      data.infoColis.poidsColis
+    // Process each package to add pricing info
+    const processedPackages = data.infoColis.map((pkg) => {
+      const { prixUnitaire, total } = calculateTotalItem(pkg.poidsColis);
+      return {
+        descriptionColis: pkg.descriptionColis,
+        poidsColis: pkg.poidsColis,
+        prixUnitaire: prixUnitaire,
+        prixColis: total,
+      };
+    });
+
+    // Calculate total from all packages
+    const totalFacture = processedPackages.reduce(
+      (sum, pkg) => sum + pkg.prixColis,
+      0
     );
+
     const factureComplete: Facture = {
       numeroFacture: numeroFacture,
       dateFacture: dateFacture,
       dateExpedition: dateExpeditionFormatted,
       expediteur: data.expediteur,
       destinataire: data.destinataire,
-      totalFacture: totalColis,
+      totalFacture: totalFacture,
       detailFacture: {
         valeurColis: data.detailFacture.valeurColis,
         assurance: data.detailFacture.assurance,
         montantAssurance: data.detailFacture.montantAssurance,
         modePaiement: data.detailFacture.modePaiement,
       },
-      infoColis: {
-        descriptionColis: data.infoColis.descriptionColis,
-        poidsColis: data.infoColis.poidsColis,
-        prixUnitaire: pu,
-        prixColis: totalColis,
-      },
+      infoColis: processedPackages,
     };
     setPreviewFacture(factureComplete);
-
     console.log(data);
   };
 
@@ -170,7 +207,7 @@ function FormulaireDenregistrement() {
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-3"
       >
-        <DeclarationElement
+        <ElementInformation
           head="Informations de l'Expéditeur"
           icon={User}
           iconColor="text-blue-800"
@@ -210,8 +247,8 @@ function FormulaireDenregistrement() {
               </span>
             </div>
           </div>
-        </DeclarationElement>
-        <DeclarationElement
+        </ElementInformation>
+        <ElementInformation
           head="Informations du Destinataire"
           icon={SquareArrowDownRight}
           iconColor="text-blue-800"
@@ -276,93 +313,112 @@ function FormulaireDenregistrement() {
               </div>
             </div>
           </div>
-        </DeclarationElement>
-        <DeclarationElement
-          head="Informations Colis"
+        </ElementInformation>
+        <ElementInformation
+          head={`Informations Colis (${fields.length})`}
           icon={FileText}
           iconColor="text-green-800"
           color="bg-[#eff8f1]"
           btn={true}
+          onBtnClick={() => {
+            append({ descriptionColis: "", poidsColis: 0 });
+          }}
         >
-          <div className="border rounded-xl p-3 border-black/10">
-            <h1 className="mb-3 font-bold text-blue-800">Colis #1</h1>
-            <div className="flex items-center">
-              <label htmlFor="categorieColis">Catégorie du colis: </label>
-              <select
-                className="border ml-5 rounded-lg border-black/10  p-2 mt-2 bg-[#f8fafc]"
-                id="categorieColis"
-              >
-                <option value="Aliment">Aliment</option>
-                <option value="Cosmetique">Cosmetique</option>
-                <option value="Mèches">Mèches</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-1 my-3">
-              <label
-                htmlFor="descriptionColis"
-                className="text-sm font-semibold"
-              >
-                Description du Colis *
-              </label>
-              <textarea
-                id="descriptionColis"
-                placeholder="Décrivez le contenu du colis..."
-                rows={3}
-                className="border rounded-xl border-black/10 p-2"
-                {...register("infoColis.descriptionColis")}
-              ></textarea>
-              <span className="text-red-400 text-xs">
-                {errors.infoColis?.descriptionColis?.message}
-              </span>
-            </div>
-            <div className="grid grid-cols-3 gap-5">
-              <div>
-                <label
-                  htmlFor="poidsColis"
-                  className="text-sm font-semibold flex gap-2"
-                >
-                  <Scale size={20} /> Poids (kg) *
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]"
-                  id="poidsColis"
-                  {...register("infoColis.poidsColis", {
-                    valueAsNumber: true,
-                  })}
-                  onChange={(e) => setpoidsItem(e.target.value)}
-                />
-                <span className="text-red-400 text-xs">
-                  {errors.infoColis?.poidsColis?.message}
-                </span>
+          {fields.map((field, index) => {
+            // Get the current package data to calculate its price
+            const currentPackage = watchedPackages[index];
+            const { prixUnitaire, total } = calculateTotalItem(
+              currentPackage?.poidsColis || 0
+            );
+
+            return (
+              <div key={field.id} className="mb-5">
+                <div className="border rounded-xl p-3 border-black/10">
+                  <div className="flex justify-between mb-3">
+                    <h1 className="font-bold text-blue-800">
+                      Article #{index + 1}
+                    </h1>
+                    {/* Only show delete button if there's more than 1 package */}
+                    {fields.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => remove(index)}
+                        className="text-red-500 p-2 rounded-xl hover:bg-red-300/15 cursor-pointer"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-1 my-3">
+                    <label
+                      htmlFor={`descriptionColis-${index}`}
+                      className="text-sm font-semibold"
+                    >
+                      Description du Colis *
+                    </label>
+                    <textarea
+                      id={`descriptionColis-${index}`}
+                      placeholder="Décrivez le contenu du colis..."
+                      rows={3}
+                      className="border rounded-xl border-black/10 p-2"
+                      {...register(`infoColis.${index}.descriptionColis`)}
+                    ></textarea>
+                    <span className="text-red-400 text-xs">
+                      {errors.infoColis?.[index]?.descriptionColis?.message}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-5">
+                    <div>
+                      <label
+                        htmlFor={`poidsColis-${index}`}
+                        className="text-sm font-semibold flex gap-2"
+                      >
+                        <Scale size={20} /> Poids (kg) *
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.1"
+                        className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#f8fafc]"
+                        id={`poidsColis-${index}`}
+                        {...register(`infoColis.${index}.poidsColis`, {
+                          valueAsNumber: true,
+                        })}
+                      />
+                      <span className="text-red-400 text-xs">
+                        {errors.infoColis?.[index]?.poidsColis?.message}
+                      </span>
+                    </div>
+                    <div>
+                      <label className="flex gap-2 text-sm font-semibold">
+                        <DollarSign size={20} /> Prix Unitaire
+                      </label>
+                      <input
+                        type="text"
+                        className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#e0e8f0] font-bold"
+                        disabled
+                        value={`${prixUnitaire} FCFA`}
+                      />
+                    </div>
+                    <div>
+                      <label className="flex gap-2 text-sm font-semibold">
+                        <DollarSign size={20} /> Prix Calculé
+                      </label>
+                      <input
+                        type="text"
+                        className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#e0e8f0] text-blue-800 font-bold"
+                        disabled
+                        value={`${total} FCFA`}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="flex gap-2 text-sm font-semibold">
-                  <DollarSign size={20} /> Prix Unitaire
-                </label>
-                <input
-                  type="text"
-                  id="prixUnitaire"
-                  className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#e0e8f0] font-bold"
-                  disabled
-                  value={`${prixUnitaire} FCFA`}
-                />
-              </div>
-              <div>
-                <label className="flex gap-2 text-sm font-semibold">
-                  <DollarSign size={20} /> Prix Calculé
-                </label>
-                <input
-                  type="text"
-                  id="prixColis"
-                  className="border rounded-lg w-full border-black/10  p-2 mt-2 bg-[#e0e8f0] text-blue-800 font-bold"
-                  disabled
-                  value={`${itemTotal} FCFA`}
-                />
-              </div>
-            </div>
-          </div>
+            );
+          })}
+
           <div className="border-t border-black/10 my-7"></div>
           <div className="flex justify-between p-5 bg-[#f4f6fb] rounded-xl items-center">
             <label className="font-semibold text-xl" htmlFor="totalFacture">
@@ -371,13 +427,13 @@ function FormulaireDenregistrement() {
             <input
               className="font-extrabold text-3xl text-blue-800 text-right"
               type="text"
-              value={`${itemTotal} FCFA`}
+              value={`${calculateGrandTotal()} FCFA`}
               id="totalFacture"
               disabled
             />
           </div>
-        </DeclarationElement>
-        <DeclarationElement
+        </ElementInformation>
+        <ElementInformation
           head="Détails de Facturation"
           icon={FileText}
           iconColor="text-green-800"
@@ -465,7 +521,7 @@ function FormulaireDenregistrement() {
               </span>
             </div>
           </div>
-        </DeclarationElement>
+        </ElementInformation>
         <div className="flex justify-center mb-5 ">
           <button
             type="submit"
