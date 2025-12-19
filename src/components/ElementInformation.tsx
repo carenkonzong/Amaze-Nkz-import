@@ -1,4 +1,4 @@
-import { type LucideIcon } from "lucide-react";
+import { Plus, type LucideIcon } from "lucide-react";
 
 type Props = {
   head: string;
@@ -7,15 +7,17 @@ type Props = {
   iconColor: string;
   color: string;
   btn?: boolean;
+  onBtnClick?: () => void;
 };
 
-function DeclarationElement({
+function ElementInformation({
   head,
   children,
   icon: Icon,
   iconColor,
   color,
   btn = false,
+  onBtnClick,
 }: Props) {
   return (
     <div className="flex justify-center mt-5 px-5">
@@ -28,8 +30,12 @@ function DeclarationElement({
             <h1 className="text-2xl font-semibold ">{head}</h1>
           </div>
           {btn && (
-            <button className="mr-2 cursor-pointer border rounded-xl px-3 py-2 bg-white border-black/10 hover:bg-green-600 hover:text-white hover:border-black/5 transition duration-300 ease-in-out hover:-translate-y-1 hover:scale-110">
-              + Ajouter un Colis
+            <button
+              type="button"
+              onClick={onBtnClick}
+              className="flex gap-3 items-center mr-2 cursor-pointer border rounded-xl px-3 py-2 bg-white border-black/10 hover:bg-green-600 hover:text-white hover:border-black/5 transition duration-300 ease-in-out hover:-translate-y-1 hover:scale-110"
+            >
+              <Plus size={18} /> Ajouter un Colis
             </button>
           )}
         </div>
@@ -41,4 +47,4 @@ function DeclarationElement({
   );
 }
 
-export default DeclarationElement;
+export default ElementInformation;

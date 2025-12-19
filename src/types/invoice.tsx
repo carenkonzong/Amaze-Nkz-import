@@ -15,7 +15,7 @@ export type infoFormulaire = {
   infoColis: {
     descriptionColis: string;
     poidsColis: number;
-  };
+  }[];
   detailFacture: detailFacture;
 };
 
