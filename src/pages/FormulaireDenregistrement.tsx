@@ -39,12 +39,6 @@ function FormulaireDenregistrement() {
     fetchNextInvoiceNumber();
   }, [dateExpedition, dateExpeditionFormatted]);
 
-  /* const [poidsItem, setpoidsItem] = useState(""); */
-
-  /* const { prixUnitaire, total } = calculateTotalItem(Number(poidsItem)); */
-
-  /* let itemTotal = total; */
-
   const REQUIRED_FIELD = "Ce champ est obligatoire";
   const schema = yup
     .object({
@@ -92,11 +86,12 @@ function FormulaireDenregistrement() {
     handleSubmit,
     watch,
     control,
+    reset,
     formState: { errors },
   } = useForm<infoFormulaire>({
     resolver: yupResolver(schema),
     defaultValues: {
-      infoColis: [{ descriptionColis: " ", poidsColis: 0 }],
+      infoColis: [{ descriptionColis: "", poidsColis: 0 }],
       detailFacture: {
         assurance: "false",
       },
@@ -134,10 +129,12 @@ function FormulaireDenregistrement() {
     });
 
     // Calculate total from all packages
-    const totalFacture = processedPackages.reduce(
+    const totalExpedition = processedPackages.reduce(
       (sum, pkg) => sum + pkg.prixColis,
       0
     );
+
+    /* const montantAssurance = detailFacture.montantAssurance ?? 0; */
 
     const factureComplete: Facture = {
       numeroFacture: numeroFacture,
@@ -145,17 +142,37 @@ function FormulaireDenregistrement() {
       dateExpedition: dateExpeditionFormatted,
       expediteur: data.expediteur,
       destinataire: data.destinataire,
-      totalFacture: totalFacture,
+      totalExpedition: totalExpedition,
       detailFacture: {
         valeurColis: data.detailFacture.valeurColis,
         assurance: data.detailFacture.assurance,
         montantAssurance: data.detailFacture.montantAssurance,
         modePaiement: data.detailFacture.modePaiement,
       },
+      totalPayer: totalExpedition + (data.detailFacture.montantAssurance ?? 0),
       infoColis: processedPackages,
     };
     setPreviewFacture(factureComplete);
-    console.log(data);
+  };
+
+  const handleConfirm = () => {
+    // Reset the form to default values
+    reset({
+      expediteur: { nomExpediteur: "", telephoneExpediteur: "" },
+      destinataire: {
+        nomDestinataire: "",
+        telephoneDestinataire: "",
+        villeDestinataire: "",
+      },
+      infoColis: [{ descriptionColis: "", poidsColis: 0 }],
+      detailFacture: {
+        valeurColis: 0,
+        assurance: "false",
+        modePaiement: "",
+      },
+    });
+
+    setPreviewFacture(null);
   };
 
   return (
@@ -421,14 +438,14 @@ function FormulaireDenregistrement() {
 
           <div className="border-t border-black/10 my-7"></div>
           <div className="flex justify-between p-5 bg-[#f4f6fb] rounded-xl items-center">
-            <label className="font-semibold text-xl" htmlFor="totalFacture">
+            <label className="font-semibold text-xl" htmlFor="totalExpedition">
               Montant Total:
             </label>
             <input
               className="font-extrabold text-3xl text-blue-800 text-right"
               type="text"
               value={`${calculateGrandTotal()} FCFA`}
-              id="totalFacture"
+              id="totalExpedition"
               disabled
             />
           </div>
@@ -547,6 +564,7 @@ function FormulaireDenregistrement() {
               <FormValidation
                 data={previewFacture}
                 onClose={() => setPreviewFacture(null)}
+                onConfirm={handleConfirm}
               />
             </div>
           </div>
