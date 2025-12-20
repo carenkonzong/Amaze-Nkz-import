@@ -37,6 +37,18 @@ function formatDate(date: Date) {
   return formattedDate;
 }
 
-function edit() {}
+const host = "http://localhost:8000";
 
-export { calculateTotalItem, generateInvoiceNumber, formatDate };
+const create = async (url: string, body: any) => {
+  const response = await fetch(`${host}/${url}`, {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  return response;
+};
+
+export { calculateTotalItem, generateInvoiceNumber, formatDate, create };

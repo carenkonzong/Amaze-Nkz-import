@@ -1,12 +1,13 @@
 export type Facture = {
   numeroFacture: string;
-  totalFacture: number;
+  totalExpedition: number;
   dateFacture: string;
   dateExpedition: string;
   expediteur: informationExpediteur;
   destinataire: informationDestinataire;
   infoColis: infoColis[];
   detailFacture: detailFacture;
+  totalPayer: number;
 };
 
 export type infoFormulaire = {

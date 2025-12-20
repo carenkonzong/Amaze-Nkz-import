@@ -1,27 +1,44 @@
 import { User, MapPin, Package, ReceiptText } from "lucide-react";
 import type { Facture } from "../types/invoice";
+import { create } from "../services/index";
 
 type Props = {
   data: Facture;
   onClose: () => void;
+  onConfirm: () => void;
 };
 
-function FormValidation({ data, onClose }: Props) {
+function FormValidation({ data, onClose, onConfirm }: Props) {
   const {
     expediteur,
     destinataire,
     infoColis,
     detailFacture,
-    totalFacture,
+    totalExpedition,
     numeroFacture,
+    totalPayer,
   } = data;
+
+  const submit = async () => {
+    try {
+      const response = await create("factures", data);
+      if (response.ok) {
+        alert("✅ Facture créée avec succès!");
+        // Optionally close the modal or redirect
+        onConfirm();
+      } else {
+        alert("❌ Erreur lors de la création de la facture");
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+      alert("❌ Erreur lors de la création de la facture");
+    }
+  };
 
   const totalWeight = infoColis.reduce(
     (sum, colis) => sum + colis.poidsColis,
     0
   );
-
-  const montantAssurance = detailFacture.montantAssurance ?? 0;
 
   return (
     <div className="flex justify-center transition-all duration-200 scale-100 opacity-100 ">
@@ -137,26 +154,31 @@ function FormValidation({ data, onClose }: Props) {
           <div className="border-b border-black/10 my-2"></div>
           <div className="flex justify-between">
             <p className="text-gray-600 text-sm">Frais d'expédition</p>
-            <p className="text-sm text-right">{`${totalFacture} FCFA`}</p>
+            <p className="text-sm text-right">{`${totalExpedition} FCFA`}</p>
           </div>
           <div className="flex justify-between mt-5 font-bold text-lg">
             <p className="text-blue-900 ">TOTAL À PAYER</p>
             {/* <p className=" text-right text-blue-900">{`${totalFacture + detailFacture?.montantAssurance} FCFA`}</p> */}
             <p className=" text-right text-blue-900">
               {detailFacture.assurance === "true"
-                ? `${totalFacture + montantAssurance} FCFA`
-                : `${totalFacture} FCFA`}
+                ? `${totalExpedition + totalPayer} FCFA`
+                : `${totalExpedition} FCFA`}
             </p>
           </div>
         </div>
         <div className="justify-end flex gap-5 mt-5">
           <button
             onClick={onClose}
+            type="button"
             className="p-2 rounded-xl border border-black/10 cursor-pointer hover:bg-green-600"
           >
             Modifier
           </button>
-          <button className="p-2 rounded-xl text-white bg-blue-900 hover:bg-blue-800 cursor-pointer">
+          <button
+            type="button"
+            onClick={submit}
+            className="p-2 rounded-xl text-white bg-blue-900 hover:bg-blue-800 cursor-pointer"
+          >
             Confirmer et Générer la Facture
           </button>
         </div>
