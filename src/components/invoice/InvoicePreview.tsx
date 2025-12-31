@@ -1,6 +1,6 @@
 import { User, MapPin, Package, ReceiptText } from "lucide-react";
-import type { Facture } from "../types/invoice";
-import { create } from "../services/index";
+import type { Facture } from "@/types/invoice";
+import { create } from "@/components/services/index";
 
 type Props = {
   data: Facture;
@@ -8,7 +8,7 @@ type Props = {
   onConfirm: () => void;
 };
 
-function FormValidation({ data, onClose, onConfirm }: Props) {
+function InvoicePreview({ data, onClose, onConfirm }: Props) {
   const {
     expediteur,
     destinataire,
@@ -187,4 +187,4 @@ function FormValidation({ data, onClose, onConfirm }: Props) {
   );
 }
 
-export default FormValidation;
+export default InvoicePreview;

@@ -1,5 +1,5 @@
 export type Facture = {
-  numeroFacture: string;
+  numeroFacture: string | null;
   totalExpedition: number;
   dateFacture: string;
   dateExpedition: string;
